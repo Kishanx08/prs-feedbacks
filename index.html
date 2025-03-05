@@ -3,130 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paleto Repair Shop - Feedback Form</title>
+    <title>Paleto Repair Shop - Complete System</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
-        .tool {
-            cursor: pointer;
-            font-size: 2rem;
-            color: #9ca3af; /* Gray for inactive tools */
-            transition: color 0.3s, transform 0.3s;
+        /* Animation Styles */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .tool:hover, .tool.active {
-            color: #4b5563; /* Dark gray for active tools */
-            transform: scale(1.2);
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+
+        /* Main Form Styling */
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        /* Admin Panel Styling */
+        .admin-panel {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px);
         }
     </style>
 </head>
-<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
-<div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border border-gray-200">
-    <!-- Logo -->
-    <div class="flex justify-center mb-6">
-        <img src="https://i.postimg.cc/g0xtWc8b/PRS-2.webp" alt="Paleto Repair Shop Logo" class="w-32 h-32">
+<body class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    
+    <!-- Admin Login Button -->
+    <button id="adminBtn" class="fixed top-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg">
+        Admin Login
+    </button>
+
+    <!-- Main Feedback Form -->
+    <div id="mainForm" class="form-container max-w-md w-full rounded-xl shadow-lg p-8 fade-in">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <img src="https://i.postimg.cc/g0xtWc8b/PRS-2.webp" 
+                 alt="Shop Logo" 
+                 class="w-24 h-24 mx-auto mb-4">
+            <h1 class="text-2xl font-bold text-gray-800">Paleto Repair Shop</h1>
+            <p class="text-gray-600">Service Feedback System</p>
+        </header>
+
+        <!-- Feedback Form -->
+        <form id="feedbackForm" class="space-y-6">
+            <!-- Customer Name -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
+                <input type="text" name="name" required 
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Mechanic Selection -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select Mechanic</label>
+                <select name="mechanic" required 
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                    id="mechanicSelect">
+                    <!-- Options loaded dynamically -->
+                </select>
+            </div>
+
+            <!-- Service Rating -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-4">Service Rating</label>
+                <div class="flex justify-between" id="ratingContainer">
+                    <!-- Rating buttons will be added dynamically -->
+                </div>
+                <input type="hidden" name="rating" required id="ratingInput">
+            </div>
+
+            <!-- Service Details -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Service Details</label>
+                <textarea name="details" rows="4" required 
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                    placeholder="Describe your experience"></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" 
+                class="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold
+                       hover:bg-blue-700 transition-colors">
+                Submit Feedback
+            </button>
+        </form>
+
+        <!-- Confirmation Message -->
+        <div id="confirmationMsg" class="hidden mt-4 p-4 bg-green-100 text-green-700 rounded-lg">
+            ✓ Feedback submitted successfully!
+        </div>
     </div>
 
-    <!-- Form Heading -->
-    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Feedback Form</h2>
-
-    <!-- Feedback Form -->
-    <form id="feedbackForm">
-        <!-- Your Name -->
-        <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700">Your Name</label>
-            <input type="text" name="username" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:border-gray-500" required>
+    <!-- Admin Panel (Hidden Initially) -->
+    <div id="adminPanel" class="admin-panel hidden max-w-md w-full rounded-xl shadow-lg p-8 fade-in">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800">Mechanic Management</h2>
+            <button id="backBtn" class="text-blue-600 hover:text-blue-800">← Back to Form</button>
         </div>
 
-        <!-- Mechanic Name -->
-        <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700">Mechanic Name</label>
-            <input type="text" name="employee" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:border-gray-500" required>
-        </div>
-
-        <!-- Service Details -->
-        <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700">Service Details</label>
-            <textarea name="service" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:border-gray-500" rows="4" required></textarea>
-        </div>
-
-        <!-- Rate the Mechanic -->
+        <!-- Add Mechanic Section -->
         <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700">Rate the Mechanic</label>
-            <div id="toolRating" class="flex justify-between mt-2">
-                <span class="tool" data-value="1">🔧</span> <!-- Wrench -->
-                <span class="tool" data-value="2">🛠️</span> <!-- Hammer and Wrench -->
-                <span class="tool" data-value="3">🔩</span> <!-- Nut and Bolt -->
-                <span class="tool" data-value="4">🚗</span> <!-- Car -->
-                <span class="tool" data-value="5">🏎️</span> <!-- Racing Car -->
-                <input type="hidden" name="rating" required>
+            <h3 class="font-medium mb-3">Add New Mechanic</h3>
+            <div class="flex gap-2">
+                <input type="text" id="newMechanicInput" 
+                    class="flex-1 px-4 py-2 border rounded-lg"
+                    placeholder="Enter mechanic name">
+                <button id="addMechanicBtn" 
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Add
+                </button>
             </div>
         </div>
 
-        <!-- Submit Button -->
-        <button type="submit" class="bg-gray-800 text-white p-2 rounded-md w-full hover:bg-gray-900 transition duration-300 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-            Submit Feedback
-        </button>
-    </form>
-</div>
+        <!-- Current Mechanics List -->
+        <div>
+            <h3 class="font-medium mb-3">Current Mechanics</h3>
+            <ul id="mechanicsList" class="space-y-2">
+                <!-- Mechanics loaded dynamically -->
+            </ul>
+        </div>
+    </div>
 
-<script>
-// Get all elements
-const tools = document.querySelectorAll(".tool");
-const ratingInput = document.querySelector("input[name='rating']");
-const form = document.getElementById("feedbackForm");
+    <script>
+        // Configuration
+        const MASTER_CREDENTIALS = { username: 'admin', password: 'paleto123' };
+        const MECHANICS_STORAGE_KEY = 'paleto_mechanics';
 
-// Add event listeners to tools (car repair emojis)
-tools.forEach(tool => {
-    tool.addEventListener("click", () => {
-        const value = tool.getAttribute("data-value");
-        ratingInput.value = value;
-        tools.forEach(t => t.classList.remove("active"));
-        tool.classList.add("active");
-        for (let i = 0; i < value; i++) {
-            tools[i].classList.add("active");
-        }
-    });
-});
+        // Initial Data
+        let mechanics = JSON.parse(localStorage.getItem(MECHANICS_STORAGE_KEY)) || [
+            'Subo Blaam',
+            'John Diesel',
+            'Mike Wrench'
+        ];
 
-// URL of your Flask backend (update this to your Heroku URL after deployment)
-const backendURL = "https://kishanx08.pythonanywhere.com/send-feedback";
+        // DOM Elements
+        const elements = {
+            mainForm: document.getElementById('mainForm'),
+            adminPanel: document.getElementById('adminPanel'),
+            adminBtn: document.getElementById('adminBtn'),
+            backBtn: document.getElementById('backBtn'),
+            mechanicSelect: document.getElementById('mechanicSelect'),
+            ratingContainer: document.getElementById('ratingContainer'),
+            ratingInput: document.getElementById('ratingInput'),
+            feedbackForm: document.getElementById('feedbackForm'),
+            confirmationMsg: document.getElementById('confirmationMsg'),
+            newMechanicInput: document.getElementById('newMechanicInput'),
+            addMechanicBtn: document.getElementById('addMechanicBtn'),
+            mechanicsList: document.getElementById('mechanicsList')
+        };
 
-// Handle form submission
-form.onsubmit = async (e) => {
-    e.preventDefault();
-    const data = new FormData(form);
-
-    try {
-        // Send data to Flask backend
-        const response = await fetch(backendURL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                username: data.get("username"),
-                employee: data.get("employee"),
-                service: data.get("service"),
-                rating: data.get("rating")
-            })
-        });
-
-        // Check if the response is OK
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+        // Initialize App
+        function initializeApp() {
+            // Load mechanics into select dropdown
+            updateMechanicsDisplay();
+            
+            // Create rating buttons
+            createRatingButtons();
+            
+            // Set up event listeners
+            setupEventListeners();
         }
 
-        // Parse the response
-        const result = await response.json();
-        console.log("Server response:", result); // Debugging
-        alert("Feedback Sent! Thank you for your review.");
-    } catch (error) {
-        // Handle errors
-        console.error("Error sending feedback:", error); // Debugging
-        alert("Failed to send feedback. Please try again.");
-    }
+        // Rating System
+        function createRatingButtons() {
+            elements.ratingContainer.innerHTML = Array.from({length: 5}, (_, i) => `
+                <button type="button" 
+                    class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center
+                           hover:bg-blue-100 transition-colors rating-btn"
+                    data-rating="${i + 1}">
+                    ${i + 1}⭐
+                </button>
+            `).join('');
 
-    // Reset the form and tools
-    form.reset();
-    tools.forEach(t => t.classList.remove("active"));
-};
-</script>
+            document.querySelectorAll('.rating-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Remove previous selections
+                    document.querySelectorAll('.rating-btn').forEach(b => 
+                        b.classList.remove('bg-blue-500', 'text-white'));
+                    
+                    // Set new selection
+                    btn.classList.add('bg-blue-500', 'text-white');
+                    elements.ratingInput.value = btn.dataset.rating;
+                });
+            });
+        }
+
+        // Mechanics Management
+        function updateMechanicsDisplay() {
+            // Update select dropdown
+            elements.mechanicSelect.innerHTML = `
+                <option value="">Select a mechanic...</option>
+                ${mechanics.map(m => `<option>${m}</option>`).join('')}
+            `;
+
+            // Update admin list
+            elements.mechanicsList.innerHTML = mechanics.map(m => `
+                <li class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
+                    <span>${m}</span>
+                    <button onclick="deleteMechanic('${m}')" 
+                        class="text-red-600 hover:text-red-800">
+                        Delete
+                    </button>
+                </li>
+            `).join('');
+
+            localStorage.setItem(MECHANICS_STORAGE_KEY, JSON.stringify(mechanics));
+        }
+
+        function deleteMechanic(name) {
+            mechanics = mechanics.filter(m => m !== name);
+            updateMechanicsDisplay();
+        }
+
+        // Event Handlers
+        function setupEventListeners() {
+            // Admin Login
+            elements.adminBtn.addEventListener('click', () => {
+                const username = prompt('Admin Username:');
+                const password = prompt('Admin Password:');
+                
+                if(username === MASTER_CREDENTIALS.username && password === MASTER_CREDENTIALS.password) {
+                    elements.mainForm.classList.add('hidden');
+                    elements.adminPanel.classList.remove('hidden');
+                    elements.adminBtn.textContent = 'Logout';
+                } else {
+                    alert('Invalid credentials!');
+                }
+            });
+
+            // Back to Form
+            elements.backBtn.addEventListener('click', () => {
+                elements.mainForm.classList.remove('hidden');
+                elements.adminPanel.classList.add('hidden');
+                elements.adminBtn.textContent = 'Admin Login';
+            });
+
+            // Add Mechanic
+            elements.addMechanicBtn.addEventListener('click', () => {
+                const newMechanic = elements.newMechanicInput.value.trim();
+                if(newMechanic) {
+                    mechanics.push(newMechanic);
+                    elements.newMechanicInput.value = '';
+                    updateMechanicsDisplay();
+                }
+            });
+
+            // Form Submission
+            elements.feedbackForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                if(!elements.feedbackForm.checkValidity()) {
+                    return alert('Please fill all required fields!');
+                }
+
+                // Show confirmation
+                elements.confirmationMsg.classList.remove('hidden');
+                setTimeout(() => elements.confirmationMsg.classList.add('hidden'), 3000);
+
+                // Reset form
+                elements.feedbackForm.reset();
+                document.querySelectorAll('.rating-btn').forEach(b => 
+                    b.classList.remove('bg-blue-500', 'text-white'));
+            });
+        }
+
+        // Start the application
+        initializeApp();
+    </script>
 </body>
 </html>
