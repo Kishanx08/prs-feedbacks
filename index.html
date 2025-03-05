@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paleto Repair Shop - Feedback Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .tool {
+            cursor: pointer;
+            font-size: 2rem;
+            color: #9ca3af; /* Gray for inactive tools */
+            transition: color 0.3s, transform 0.3s;
+        }
+        .tool:hover, .tool.active {
+            color: #4b5563; /* Dark gray for active tools */
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
+<div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border border-gray-200">
+    <!-- Logo -->
+    <div class="flex justify-center mb-6">
+        <img src="https://i.postimg.cc/g0xtWc8b/PRS-2.webp" alt="Paleto Repair Shop Logo" class="w-32 h-32">
+    </div>
+
+    <!-- Form Heading -->
+    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Feedback Form</h2>
+
+    <!-- Feedback Form -->
+    <form id="feedbackForm">
+        <!-- Your Name -->
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700">Your Name</label>
+            <input type="text" name="username" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:border-gray-500" required>
+        </div>
+
+        <!-- Mechanic Name -->
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700">Mechanic Name</label>
+            <input type="text" name="employee" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:border-gray-500" required>
+        </div>
+
+        <!-- Service Details -->
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700">Service Details</label>
+            <textarea name="service" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:border-gray-500" rows="4" required></textarea>
+        </div>
+
+        <!-- Rate the Mechanic -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700">Rate the Mechanic</label>
+            <div id="toolRating" class="flex justify-between mt-2">
+                <span class="tool" data-value="1">🔧</span> <!-- Wrench -->
+                <span class="tool" data-value="2">🛠️</span> <!-- Hammer and Wrench -->
+                <span class="tool" data-value="3">🔩</span> <!-- Nut and Bolt -->
+                <span class="tool" data-value="4">🚗</span> <!-- Car -->
+                <span class="tool" data-value="5">🏎️</span> <!-- Racing Car -->
+                <input type="hidden" name="rating" required>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="bg-gray-800 text-white p-2 rounded-md w-full hover:bg-gray-900 transition duration-300 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+            Submit Feedback
+        </button>
+    </form>
+</div>
+
+<script>
+// Get all elements
+const tools = document.querySelectorAll(".tool");
+const ratingInput = document.querySelector("input[name='rating']");
+const form = document.getElementById("feedbackForm");
+
+// Add event listeners to tools (car repair emojis)
+tools.forEach(tool => {
+    tool.addEventListener("click", () => {
+        const value = tool.getAttribute("data-value");
+        ratingInput.value = value;
+        tools.forEach(t => t.classList.remove("active"));
+        tool.classList.add("active");
+        for (let i = 0; i < value; i++) {
+            tools[i].classList.add("active");
+        }
+    });
+});
+
+// URL of your Flask backend (update this to your Heroku URL after deployment)
+const backendURL = "https://your-heroku-app.herokuapp.com/send-feedback";
+
+// Handle form submission
+form.onsubmit = async (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+
+    try {
+        // Send data to Flask backend
+        const response = await fetch(backendURL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                username: data.get("username"),
+                employee: data.get("employee"),
+                service: data.get("service"),
+                rating: data.get("rating")
+            })
+        });
+
+        // Check if the response is OK
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        // Parse the response
+        const result = await response.json();
+        console.log("Server response:", result); // Debugging
+        alert("Feedback Sent! Thank you for your review.");
+    } catch (error) {
+        // Handle errors
+        console.error("Error sending feedback:", error); // Debugging
+        alert("Failed to send feedback. Please try again.");
+    }
+
+    // Reset the form and tools
+    form.reset();
+    tools.forEach(t => t.classList.remove("active"));
+};
+</script>
+</body>
+</html>
