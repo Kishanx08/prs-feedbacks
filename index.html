@@ -24,6 +24,13 @@
         Admin Login
     </button>
 
+    <!-- leaderboard Button -->
+
+    <button id="leaderboardBtn" 
+        class="fixed top-4 left-4 bg-green-600 text-white px-4 py-2 rounded-lg">
+    🏆 Leaderboard
+    </button>
+
     <!-- Main Form -->
     <div id="mainForm" class="bg-white max-w-md w-full rounded-xl shadow-lg p-8 fade-in">
         <header class="text-center mb-8">
@@ -247,7 +254,66 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial load
     loadMechanics();
 });
+<script>
+// Initial load
+loadMechanics();
+
+// Add all new code here
+function showLeaderboard() {
+    document.getElementById('mainForm').classList.add('hidden');
+    document.getElementById('leaderboardPage').classList.remove('hidden');
+    document.getElementById('adminPanel').classList.add('hidden');
+    loadLeaderboard();
+}
+
+function showMainPage() {
+    document.getElementById('mainForm').classList.remove('hidden');
+    document.getElementById('leaderboardPage').classList.add('hidden');
+}
+
+document.getElementById('leaderboardBtn').addEventListener('click', showLeaderboard);
+
+async function loadLeaderboard() {
+    try {
+        const [stats, leaderboard] = await Promise.all([
+            fetch('/api/stats').then(r => r.json()),
+            fetch('/api/leaderboard').then(r => r.json())
+        ]);
+
+        // Update stats
+        document.getElementById('lbTotal').textContent = stats.total_feedbacks;
+        document.getElementById('lbAverage').textContent = stats.average_rating.toFixed(1);
+
+        // Update table
+        document.getElementById('leaderboardBody').innerHTML = leaderboard.map((entry, index) => `
+            <tr class="${index < 3 ? ['gold', 'silver', 'bronze'][index] : ''}">
+                <td class="px-6 py-4">${index + 1}</td>
+                <td class="px-6 py-4 font-medium">${entry.name}</td>
+                <td class="px-6 py-4 text-center">
+                    <span class="px-2 py-1 rounded ${
+                        entry.average >= 4.5 ? 'bg-green-100 text-green-800' :
+                        entry.average >= 3 ? 'bg-blue-100 text-blue-800' : 
+                        'bg-red-100 text-red-800'
+                    }">
+                        ⭐ ${entry.average}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-center">${entry.total}</td>
+            </tr>
+        `).join('');
+    } catch(error) {
+        console.error('Error loading leaderboard:', error);
+        alert('Failed to load leaderboard. Try refreshing!');
+    }
+}
+
+// Auto-refresh every 5 minutes
+setInterval(() => {
+    if(!document.getElementById('leaderboardPage').classList.contains('hidden')) {
+        loadLeaderboard();
+    }
+}, 300000);  // 5 minutes
+});
 </script>
-    <!-- END OF SCRIPT -->
 </body>
 </html>
