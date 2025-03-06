@@ -106,113 +106,148 @@
     </div>
 
     <!-- SIMPLE SCRIPT START - COPY EVERYTHING BELOW THIS LINE -->
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Basic Setup
-        let mechanics = JSON.parse(localStorage.getItem('paleto_mechanics')) || [
-            'Subo Blaam',
-            'John Diesel',
-            'Mike Wrench'
-        ];
-        
-        // 1. Setup Mechanics Dropdown
-        const mechanicSelect = document.getElementById('mechanicSelect');
-        function updateMechanics() {
-            mechanicSelect.innerHTML = '<option value="">Select mechanic...</option>' + 
-                mechanics.map(m => `<option>${m}</option>`).join('');
-            
-            document.getElementById('mechanicsList').innerHTML = mechanics.map(m => `
-                <li class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
-                    <span>${m}</span>
-                    <button onclick="deleteMechanic('${m}')" class="text-red-600 hover:text-red-800">
-                        Delete
-                    </button>
-                </li>
-            `).join('');
-            
-            localStorage.setItem('paleto_mechanics', JSON.stringify(mechanics));
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // ⚡ 1. Mechanics Management (Server-Based)
+    const mechanicSelect = document.getElementById('mechanicSelect');
+    let mechanics = [];
+
+    // ⚡ Load mechanics from server
+    async function loadMechanics() {
+        try {
+            const response = await fetch('https://kishanx08.pythonanywhere.com/api/mechanics');
+            mechanics = await response.json();
+            updateMechanicsDisplay();
+        } catch(error) {
+            alert("Failed to load mechanics. Try refreshing!");
         }
-        updateMechanics();
+    }
 
-        // 2. Rating System
-        document.querySelectorAll('.rating-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-                document.getElementById('ratingInput').value = btn.dataset.rating;
-            });
+    // ⚡ Update display function
+    function updateMechanicsDisplay() {
+        // Update dropdown
+        mechanicSelect.innerHTML = '<option value="">Select mechanic...</option>' + 
+            mechanics.map(m => `<option>${m}</option>`).join('');
+        
+        // Update admin list
+        document.getElementById('mechanicsList').innerHTML = mechanics.map(m => `
+            <li class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
+                <span>${m}</span>
+                <button onclick="deleteMechanic('${m}')" class="text-red-600 hover:text-red-800">
+                    Delete
+                </button>
+            </li>
+        `).join('');
+    }
+
+    // 2. Rating System (No changes)
+    document.querySelectorAll('.rating-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById('ratingInput').value = btn.dataset.rating;
         });
+    });
 
-        // 3. Form Submission
-        document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = {
-                name: document.querySelector('[name="name"]').value,
-                mechanic: document.querySelector('[name="mechanic"]').value,
-                details: document.querySelector('[name="details"]').value,
-                rating: document.getElementById('ratingInput').value
-            };
+    // 3. Form Submission (No changes)
+    document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = {
+            name: document.querySelector('[name="name"]').value,
+            mechanic: document.querySelector('[name="mechanic"]').value,
+            details: document.querySelector('[name="details"]').value,
+            rating: document.getElementById('ratingInput').value
+        };
 
-            if(!formData.name || !formData.mechanic || !formData.details || !formData.rating) {
-                alert('Please fill all fields!');
-                return;
+        if(!formData.name || !formData.mechanic || !formData.details || !formData.rating) {
+            alert('Please fill all fields!');
+            return;
+        }
+
+        try {
+            const response = await fetch('https://kishanx08.pythonanywhere.com/send-feedback', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(formData)
+            });
+
+            if(response.ok) {
+                document.getElementById('confirmationMsg').classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('confirmationMsg').classList.add('hidden');
+                }, 3000);
+                e.target.reset();
+            } else {
+                alert('Server error! Try again.');
             }
+        } catch(error) {
+            alert('Failed to send - check internet');
+        }
+    });
 
+    // ⚡ 4. Updated Admin Panel Functions
+    document.getElementById('adminBtn').addEventListener('click', () => {
+        const username = prompt('Admin username:');
+        const password = prompt('Admin password:');
+        
+        if(username === 'admin' && password === 'paleto16.02') {
+            document.getElementById('mainForm').classList.add('hidden');
+            document.getElementById('adminPanel').classList.remove('hidden');
+            loadMechanics(); // ⚡ Refresh from server
+        } else {
+            alert('Wrong credentials!');
+        }
+    });
+
+    document.getElementById('backBtn').addEventListener('click', () => {
+        document.getElementById('mainForm').classList.remove('hidden');
+        document.getElementById('adminPanel').classList.add('hidden');
+    });
+
+    // ⚡ Add Mechanic with Server Sync
+    document.getElementById('addMechanicBtn').addEventListener('click', async () => {
+        const newMechanic = document.getElementById('newMechanicInput').value.trim();
+        if(newMechanic) {
             try {
-                const response = await fetch('https://kishanx08.pythonanywhere.com/send-feedback', {
+                const response = await fetch('https://kishanx08.pythonanywhere.com/api/mechanics', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify({ name: newMechanic })
                 });
-
+                
                 if(response.ok) {
-                    document.getElementById('confirmationMsg').classList.remove('hidden');
-                    setTimeout(() => {
-                        document.getElementById('confirmationMsg').classList.add('hidden');
-                    }, 3000);
-                    e.target.reset();
-                } else {
-                    alert('Server error! Try again.');
+                    document.getElementById('newMechanicInput').value = '';
+                    await loadMechanics(); // ⚡ Refresh list
                 }
             } catch(error) {
-                alert('Failed to send - check internet');
+                alert('Failed to save mechanic');
             }
-        });
-
-        // 4. Admin Panel
-        document.getElementById('adminBtn').addEventListener('click', () => {
-            const username = prompt('Admin username:');
-            const password = prompt('Admin password:');
-            
-            if(username === 'admin' && password === 'paleto16.02') {
-                document.getElementById('mainForm').classList.add('hidden');
-                document.getElementById('adminPanel').classList.remove('hidden');
-            } else {
-                alert('Wrong credentials!');
-            }
-        });
-
-        document.getElementById('backBtn').addEventListener('click', () => {
-            document.getElementById('mainForm').classList.remove('hidden');
-            document.getElementById('adminPanel').classList.add('hidden');
-        });
-
-        document.getElementById('addMechanicBtn').addEventListener('click', () => {
-            const newMechanic = document.getElementById('newMechanicInput').value.trim();
-            if(newMechanic) {
-                mechanics.push(newMechanic);
-                updateMechanics();
-                document.getElementById('newMechanicInput').value = '';
-            }
-        });
-
-        window.deleteMechanic = (name) => {
-            mechanics = mechanics.filter(m => m !== name);
-            updateMechanics();
-        };
+        }
     });
-    </script>
+
+    // ⚡ Delete Mechanic with Server Sync
+    window.deleteMechanic = async (name) => {
+        if(confirm(`Delete ${name} permanently?`)) {
+            try {
+                const response = await fetch(
+                    `https://kishanx08.pythonanywhere.com/api/mechanics/${encodeURIComponent(name)}`,
+                    { method: 'DELETE' }
+                );
+                
+                if(response.ok) {
+                    await loadMechanics(); // ⚡ Refresh list
+                }
+            } catch(error) {
+                alert('Failed to delete mechanic');
+            }
+        }
+    };
+
+    // Initial load
+    loadMechanics();
+});
+</script>
     <!-- END OF SCRIPT -->
 </body>
 </html>
