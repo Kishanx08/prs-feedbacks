@@ -15,9 +15,6 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .gold { background: #f7d66a !important; }
-        .silver { background: #c0c0c0 !important; }
-        .bronze { background: #cd7f32 !important; }
     </style>
 </head>
 <body class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -25,12 +22,6 @@
     <!-- Admin Button -->
     <button id="adminBtn" class="fixed top-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg">
         Admin Login
-    </button>
-
-    <!-- Leaderboard Button -->
-    <button id="leaderboardBtn" 
-        class="fixed top-4 left-4 bg-green-600 text-white px-4 py-2 rounded-lg">
-        🏆 Leaderboard
     </button>
 
     <!-- Main Form -->
@@ -114,71 +105,22 @@
         </ul>
     </div>
 
-    <!-- Leaderboard Page -->
-    <div id="leaderboardPage" class="hidden max-w-4xl mx-auto p-8">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl font-bold text-gray-800">Mechanic Performance</h2>
-            <button onclick="showMainPage()" 
-                    class="text-blue-600 hover:text-blue-800 flex items-center">
-                ← Back to Form
-            </button>
-        </div>
-
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-2 gap-4 mb-8">
-            <div class="bg-white p-6 rounded-xl shadow">
-                <div class="text-3xl font-bold text-center" id="lbTotal">0</div>
-                <div class="text-gray-600 text-center">Total Feedbacks</div>
-            </div>
-            <div class="bg-white p-6 rounded-xl shadow">
-                <div class="text-3xl font-bold text-center" id="lbAverage">0.0</div>
-                <div class="text-gray-600 text-center">Average Rating</div>
-            </div>
-        </div>
-
-        <!-- Leaderboard Table -->
-        <div class="bg-white rounded-xl shadow overflow-hidden">
-            <table class="w-full">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left">Rank</th>
-                        <th class="px-6 py-3 text-left">Mechanic</th>
-                        <th class="px-6 py-3 text-center">Rating</th>
-                        <th class="px-6 py-3 text-center">Jobs</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboardBody" class="divide-y divide-gray-200">
-                    <!-- Dynamic content -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- JavaScript -->
+    <!-- SIMPLE SCRIPT START - COPY EVERYTHING BELOW THIS LINE -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // ⚡ 1. Mechanics Management (Server-Based)
+        // Basic Setup
+        let mechanics = JSON.parse(localStorage.getItem('paleto_mechanics')) || [
+            'Subo Blaam',
+            'John Diesel',
+            'Mike Wrench'
+        ];
+        
+        // 1. Setup Mechanics Dropdown
         const mechanicSelect = document.getElementById('mechanicSelect');
-        let mechanics = [];
-
-        // ⚡ Load mechanics from server
-        async function loadMechanics() {
-            try {
-                const response = await fetch('https://kishanx08.pythonanywhere.com/api/mechanics');
-                mechanics = await response.json();
-                updateMechanicsDisplay();
-            } catch(error) {
-                alert("Failed to load mechanics. Try refreshing!");
-            }
-        }
-
-        // ⚡ Update display function
-        function updateMechanicsDisplay() {
-            // Update dropdown
+        function updateMechanics() {
             mechanicSelect.innerHTML = '<option value="">Select mechanic...</option>' + 
                 mechanics.map(m => `<option>${m}</option>`).join('');
             
-            // Update admin list
             document.getElementById('mechanicsList').innerHTML = mechanics.map(m => `
                 <li class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
                     <span>${m}</span>
@@ -187,9 +129,12 @@
                     </button>
                 </li>
             `).join('');
+            
+            localStorage.setItem('paleto_mechanics', JSON.stringify(mechanics));
         }
+        updateMechanics();
 
-        // 2. Rating System (No changes)
+        // 2. Rating System
         document.querySelectorAll('.rating-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
@@ -198,7 +143,7 @@
             });
         });
 
-        // 3. Form Submission (No changes)
+        // 3. Form Submission
         document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -235,7 +180,7 @@
             }
         });
 
-        // ⚡ 4. Updated Admin Panel Functions
+        // 4. Admin Panel
         document.getElementById('adminBtn').addEventListener('click', () => {
             const username = prompt('Admin username:');
             const password = prompt('Admin password:');
@@ -243,7 +188,6 @@
             if(username === 'admin' && password === 'paleto16.02') {
                 document.getElementById('mainForm').classList.add('hidden');
                 document.getElementById('adminPanel').classList.remove('hidden');
-                loadMechanics(); // ⚡ Refresh from server
             } else {
                 alert('Wrong credentials!');
             }
@@ -254,104 +198,21 @@
             document.getElementById('adminPanel').classList.add('hidden');
         });
 
-        // ⚡ Add Mechanic with Server Sync
-        document.getElementById('addMechanicBtn').addEventListener('click', async () => {
+        document.getElementById('addMechanicBtn').addEventListener('click', () => {
             const newMechanic = document.getElementById('newMechanicInput').value.trim();
             if(newMechanic) {
-                try {
-                    const response = await fetch('https://kishanx08.pythonanywhere.com/api/mechanics', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ name: newMechanic })
-                    });
-                    
-                    if(response.ok) {
-                        document.getElementById('newMechanicInput').value = '';
-                        await loadMechanics(); // ⚡ Refresh list
-                    }
-                } catch(error) {
-                    alert('Failed to save mechanic');
-                }
+                mechanics.push(newMechanic);
+                updateMechanics();
+                document.getElementById('newMechanicInput').value = '';
             }
         });
 
-        // ⚡ Delete Mechanic with Server Sync
-        window.deleteMechanic = async (name) => {
-            if(confirm(`Delete ${name} permanently?`)) {
-                try {
-                    const response = await fetch(
-                        `https://kishanx08.pythonanywhere.com/api/mechanics/${encodeURIComponent(name)}`,
-                        { method: 'DELETE' }
-                    );
-                    
-                    if(response.ok) {
-                        await loadMechanics(); // ⚡ Refresh list
-                    }
-                } catch(error) {
-                    alert('Failed to delete mechanic');
-                }
-            }
+        window.deleteMechanic = (name) => {
+            mechanics = mechanics.filter(m => m !== name);
+            updateMechanics();
         };
-
-        // Leaderboard Functions
-        function showLeaderboard() {
-            document.getElementById('mainForm').classList.add('hidden');
-            document.getElementById('leaderboardPage').classList.remove('hidden');
-            document.getElementById('adminPanel').classList.add('hidden');
-            loadLeaderboard();
-        }
-
-        function showMainPage() {
-            document.getElementById('mainForm').classList.remove('hidden');
-            document.getElementById('leaderboardPage').classList.add('hidden');
-        }
-
-        document.getElementById('leaderboardBtn').addEventListener('click', showLeaderboard);
-
-        async function loadLeaderboard() {
-            try {
-                const [stats, leaderboard] = await Promise.all([
-                    fetch('/api/stats').then(r => r.json()),
-                    fetch('/api/leaderboard').then(r => r.json())
-                ]);
-
-                // Update stats
-                document.getElementById('lbTotal').textContent = stats.total_feedbacks;
-                document.getElementById('lbAverage').textContent = stats.average_rating.toFixed(1);
-
-                // Update table
-                document.getElementById('leaderboardBody').innerHTML = leaderboard.map((entry, index) => `
-                    <tr class="${index < 3 ? ['gold', 'silver', 'bronze'][index] : ''}">
-                        <td class="px-6 py-4">${index + 1}</td>
-                        <td class="px-6 py-4 font-medium">${entry.name}</td>
-                        <td class="px-6 py-4 text-center">
-                            <span class="px-2 py-1 rounded ${
-                                entry.average >= 4.5 ? 'bg-green-100 text-green-800' :
-                                entry.average >= 3 ? 'bg-blue-100 text-blue-800' : 
-                                'bg-red-100 text-red-800'
-                            }">
-                                ⭐ ${entry.average}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-center">${entry.total}</td>
-                    </tr>
-                `).join('');
-            } catch(error) {
-                console.error('Error loading leaderboard:', error);
-                alert('Failed to load leaderboard. Try refreshing!');
-            }
-        }
-
-        // Auto-refresh every 5 minutes
-        setInterval(() => {
-            if(!document.getElementById('leaderboardPage').classList.contains('hidden')) {
-                loadLeaderboard();
-            }
-        }, 300000);  // 5 minutes
-
-        // Initial load
-        loadMechanics();
     });
     </script>
+    <!-- END OF SCRIPT -->
 </body>
 </html>
