@@ -43,8 +43,8 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    localStorage.setItem('adminToken', data.token);
-                    window.location.href = 'index.html';
+                    localStorage.setItem('adminToken', data.access_token); // Store the JWT token
+                    window.location.href = 'index.html'; // Redirect to the index page
                 } else {
                     alert('Invalid credentials');
                 }
