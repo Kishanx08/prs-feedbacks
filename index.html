@@ -119,12 +119,13 @@
             if (token) {
                 document.getElementById('mainForm').classList.add('hidden');
                 document.getElementById('adminPanel').classList.remove('hidden');
+                loadMechanics(); // Load mechanics after login
             }
 
             // Load mechanics
             async function loadMechanics() {
                 try {
-                    const response = await fetch('https://kishanx08.pythonanywhere.com/api/mechanics', {
+                    const response = await fetch('/api/mechanics', {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
                         }
@@ -176,7 +177,7 @@
                 }
 
                 try {
-                    const response = await fetch('https://kishanx08.pythonanywhere.com/send-feedback', {
+                    const response = await fetch('/send-feedback', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(formData)
@@ -212,7 +213,7 @@
                 const newMechanic = document.getElementById('newMechanicInput').value.trim();
                 if (newMechanic) {
                     try {
-                        const response = await fetch('https://kishanx08.pythonanywhere.com/api/mechanics', {
+                        const response = await fetch('/api/mechanics', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -236,7 +237,7 @@
                 if (confirm(`Delete ${name} permanently?`)) {
                     try {
                         const response = await fetch(
-                            `https://kishanx08.pythonanywhere.com/api/mechanics/${encodeURIComponent(name)}`,
+                            `/api/mechanics/${encodeURIComponent(name)}`,
                             {
                                 method: 'DELETE',
                                 headers: {
