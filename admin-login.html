@@ -43,8 +43,8 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    localStorage.setItem('adminToken', data.token); // Store token
-                    window.location.href = 'admin-panel.html'; // Redirect to admin panel
+                    localStorage.setItem('adminToken', data.token);
+                    window.location.href = 'index.html';
                 } else {
                     alert('Invalid credentials');
                 }
